@@ -24,18 +24,25 @@ public class StreamingService : IDisposable
         string model,
         string apiKey,
         string userMessage,
+        string? systemMessage,
         Action<string> onChunkReceived,
         CancellationToken cancellationToken = default)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+        var messages = new List<Message>();
+
+        if (!string.IsNullOrWhiteSpace(systemMessage))
+        {
+            messages.Add(new Message { Role = "system", Content = systemMessage });
+        }
+
+        messages.Add(new Message { Role = "user", Content = userMessage });
+
         var request = new ChatRequest
         {
             Model = model,
-            Messages = new List<Message>
-            {
-                new Message { Role = "user", Content = userMessage }
-            },
+            Messages = messages,
             Stream = true
         };
 

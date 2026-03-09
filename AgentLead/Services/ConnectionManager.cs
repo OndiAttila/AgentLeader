@@ -32,6 +32,7 @@ public class ConnectionManager : IDisposable
         string model,
         string apiKey,
         string userMessage,
+        string? systemMessage,
         Action<string> onChunkReceived,
         CancellationToken cancellationToken = default)
     {
@@ -46,6 +47,7 @@ public class ConnectionManager : IDisposable
                 model,
                 apiKey,
                 userMessage,
+                systemMessage,
                 onChunkReceived,
                 cancellationToken);
 
@@ -68,6 +70,7 @@ public class ConnectionManager : IDisposable
         string model,
         string apiKey,
         string userMessage,
+        string? systemMessage,
         Action<string> onChunkReceived,
         CancellationToken cancellationToken = default)
     {
@@ -93,6 +96,7 @@ public class ConnectionManager : IDisposable
                     model,
                     apiKey,
                     userMessage,
+                    systemMessage,
                     onChunkReceived,
                     cancellationToken);
 

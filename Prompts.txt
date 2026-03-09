@@ -24,3 +24,10 @@ Create a project tree description of the AgentLead project and save it in the fi
 ===[ ]===
 Create a test suite that addresses the items in step 9 in the file Plan.md.  Make sure the tests pass
 ---------
+
+===[ ]===
+Update the code in the AgentLead directory to allow the user to specify a System message along with the user's regular message.
+By default no System message is specified.
+The user can specify the path to the file containing the system message with the config command /s.
+If a System message has been specified (via the /s config command), that same System message should be used in all further communication until a new System message has been specified
+---------

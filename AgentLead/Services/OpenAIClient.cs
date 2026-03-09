@@ -18,6 +18,7 @@ public class OpenAIClient : IDisposable
         string model,
         string apiKey,
         string message,
+        string? systemMessage,
         Action<string> onChunkReceived,
         CancellationToken cancellationToken = default)
     {
@@ -26,6 +27,7 @@ public class OpenAIClient : IDisposable
             model,
             apiKey,
             message,
+            systemMessage,
             onChunkReceived,
             cancellationToken);
 

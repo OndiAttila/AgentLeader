@@ -5,6 +5,7 @@ public class AppConfiguration
     public string BaseUrl { get; set; } = "https://api.openai.com/v1";
     public string ModelName { get; set; } = "gpt-4";
     public string ApiKey { get; set; } = "dummy";
+    public string? SystemMessage { get; set; } = null;
     public bool Help { get; set; } = false;
 
     public static AppConfiguration Parse(string[] args)
@@ -27,6 +28,12 @@ public class AppConfiguration
                 continue;
             }
 
+            if (arg == "--api-key" && i + 1 < args.Length)
+            {
+                options.ApiKey = args[++i];
+                continue;
+            }
+
             if ((arg == "--model" || arg == "-m") && i + 1 < args.Length)
             {
                 options.ModelName = args[++i];
@@ -42,6 +49,12 @@ public class AppConfiguration
             if (arg.StartsWith("-u="))
             {
                 options.BaseUrl = arg.Substring("-u=".Length);
+                continue;
+            }
+
+            if (arg.StartsWith("--api-key="))
+            {
+                options.ApiKey = arg.Substring("--api-key=".Length);
                 continue;
             }
 
@@ -66,6 +79,31 @@ public class AppConfiguration
         ApiKey = apiKey.Trim();
     }
 
+    public bool SetSystemMessageFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine($"Error: File not found: {filePath}");
+            return false;
+        }
+
+        try
+        {
+            SystemMessage = File.ReadAllText(filePath).Trim();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading file: {ex.Message}");
+            return false;
+        }
+    }
+
+    public void ClearSystemMessage()
+    {
+        SystemMessage = null;
+    }
+
     public bool PromptForApiKey() 
     {
         Console.Write("Enter your OpenAI API key: ");
@@ -83,6 +121,7 @@ public class AppConfiguration
         Console.WriteLine($"  Base URL: {BaseUrl}");
         Console.WriteLine($"  Model: {ModelName}");
         Console.WriteLine($"  API Key: {(!string.IsNullOrWhiteSpace(ApiKey) ? "Set" : "Not Set")}");
+        Console.WriteLine($"  System Message: {(string.IsNullOrWhiteSpace(SystemMessage) ? "Not Set" : "Set")}");
         Console.WriteLine();
     }
 
@@ -100,6 +139,8 @@ public class AppConfiguration
         Console.WriteLine("Interactive Commands:");
         Console.WriteLine("  /base-url <url>, /u <url>   Set base URL");
         Console.WriteLine("  /model <name>, /m <name>    Set model name");
+        Console.WriteLine("  /s <file-path>              Set system message from file");
+        Console.WriteLine("  /s clear                    Clear system message");
         Console.WriteLine("  /quit, /exit, /q             Exit the program");
     }
 }

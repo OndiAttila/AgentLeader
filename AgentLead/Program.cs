@@ -73,11 +73,38 @@ while (!shouldExit)
         continue;
     }
 
+    if (input.StartsWith("/s ", StringComparison.OrdinalIgnoreCase))
+    {
+        var parts = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 2)
+        {
+            if (parts[1].Equals("clear", StringComparison.OrdinalIgnoreCase))
+            {
+                config.ClearSystemMessage();
+                Console.WriteLine("System message cleared.");
+            }
+            else
+            {
+                if (config.SetSystemMessageFromFile(parts[1]))
+                {
+                    Console.WriteLine("System message set successfully.");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("Usage: /s <file-path> or /s clear");
+        }
+        continue;
+    }
+
     if (input.StartsWith("/"))
     {
         Console.WriteLine("Unknown command. Available commands:");
         Console.WriteLine("  /base-url <url>, /u <url>   Set base URL");
         Console.WriteLine("  /model <name>, /m <name>    Set model name");
+        Console.WriteLine("  /s <file-path>              Set system message from file");
+        Console.WriteLine("  /s clear                    Clear system message");
         Console.WriteLine("  /quit, /exit, /q             Exit the program");
         continue;
     }
@@ -93,6 +120,7 @@ while (!shouldExit)
             config.ModelName,
             config.ApiKey,
             input,
+            config.SystemMessage,
             chunk =>
             {
                 if (isFirstChunk)

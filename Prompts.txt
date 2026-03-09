@@ -1,0 +1,20 @@
+===[ ]===
+Outline the high-level steps required to create a command line project in C#, named AgentLead, that uses the OpenAI API to send queries to a Large Language Model (LLM) and displays the response from the LLM.
+Allow the user to specify the base URL to the OpenAI API.
+The user should be able to specify the base URL as a command line parameter, as well as during the execution of the program.
+If the base URL is not otherwise specified, use a default value instead.
+Allow the user to specify the LLM model name to use.
+The user should be able to specify the model name as a command line parameter, as well as during the execution of the program.
+If the model name is not otherwise specified, use a default value instead.
+Allow the user to send a new query (after the LLM responded to the last one) as many times as the user desires.
+The program should use the streaming HTTP protocol to send the queries (and receive the responses) and periodically send the necessary "ping" messages to keep the connection alive,
+even if the user has not sent a query within the wait period of 1 minute.
+If the streaming HTTP connection is closed for any reason, the program should try to reestablish the connection 5 times, before notifying the user about the error.
+Save the outline in Markdown format to the file Plan.md
+---------
+
+===[ ]===
+Following the high-level steps outlined in the file Plan.md, generate the project files for the AgentLead project.
+---------
+
+===[ ]===

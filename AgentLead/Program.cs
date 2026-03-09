@@ -73,27 +73,26 @@ while (!shouldExit)
         continue;
     }
 
+    if (input == "/s")
+    {
+        config.ClearSystemMessage();
+        Console.WriteLine("System message cleared.");
+        continue;
+    }
+
     if (input.StartsWith("/s ", StringComparison.OrdinalIgnoreCase))
     {
         var parts = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 2)
         {
-            if (parts[1].Equals("clear", StringComparison.OrdinalIgnoreCase))
+            if (config.SetSystemMessageFromFile(parts[1]))
             {
-                config.ClearSystemMessage();
-                Console.WriteLine("System message cleared.");
-            }
-            else
-            {
-                if (config.SetSystemMessageFromFile(parts[1]))
-                {
-                    Console.WriteLine("System message set successfully.");
-                }
+                Console.WriteLine("System message set successfully.");
             }
         }
         else
         {
-            Console.WriteLine("Usage: /s <file-path> or /s clear");
+            Console.WriteLine("Usage: /s <file-path> (to set a System message) or /s (to clear the current System message)");
         }
         continue;
     }
@@ -104,8 +103,8 @@ while (!shouldExit)
         Console.WriteLine("  /base-url <url>, /u <url>   Set base URL");
         Console.WriteLine("  /model <name>, /m <name>    Set model name");
         Console.WriteLine("  /s <file-path>              Set system message from file");
-        Console.WriteLine("  /s clear                    Clear system message");
-        Console.WriteLine("  /quit, /exit, /q             Exit the program");
+        Console.WriteLine("  /s                          Clear system message");
+        Console.WriteLine("  /quit, /exit, /q            Exit the program");
         continue;
     }
 

@@ -50,6 +50,7 @@ public class StreamingService : IDisposable
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 #region debug
 Console.WriteLine($"[StreamingService.SendStreamingRequestAsync] sending content: |{json}|");
+var fullResponse="";
 #endregion
 
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
@@ -115,6 +116,10 @@ Console.WriteLine($"\n[StreamingService.SendStreamingRequestAsync]] response lin
                             var contentDelta = response?.Choices?.FirstOrDefault()?.Delta?.Content;
                             if (!string.IsNullOrEmpty(contentDelta))
                             {
+#region debug
+fullResponse += contentDelta;
+Console.WriteLine($"\n[StreamingService.SendStreamingRequestAsync]] full response so far: |{fullResponse}|");
+#endregion
                                 onChunkReceived(contentDelta);
                             }
                         }

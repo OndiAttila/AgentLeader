@@ -18,3 +18,9 @@ Following the high-level steps outlined in the file Plan.md, generate the projec
 ---------
 
 ===[ ]===
+Create a project tree description of the AgentLead project and save it in the file ProjectTree.md
+---------
+
+===[ ]===
+Create a test suite that addresses the items in step 9 in the file Plan.md.  Make sure the tests pass
+---------

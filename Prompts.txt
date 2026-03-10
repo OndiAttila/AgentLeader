@@ -40,3 +40,12 @@ Define two such capabilities:
 When sending messages to the Agent, include the available tool capabilities in the Agent message.
 When the Agent responds with a tool call request, invoke the appropriate tool capability and respond to the Agent with the result of the call as a continuation of the previous message flow.
 ---------
+
+===[ ]===
+Create a new dotnet project named "MCPServer" in the MCPServer folder that provides tool call capabilities for use by LLMs.
+Define two tool functions for the MCPServer:
+- capitalize: When called, it will return the input text in all-caps format
+- datetime: When called, it will return the current date and time in ISO 8601 format
+---------
+- Project created with tool call support for stdio
+

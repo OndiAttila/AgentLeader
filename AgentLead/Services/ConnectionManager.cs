@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Timers;
+using AgentLead.Models;
 using AgentLead.Options;
 using Timer = System.Timers.Timer;
 
@@ -33,7 +34,10 @@ public class ConnectionManager : IDisposable
         string apiKey,
         string userMessage,
         string? systemMessage,
+        List<Tool>? tools,
+        List<Message>? conversationHistory,
         Action<string> onChunkReceived,
+        Action<List<ToolCall>> onToolCallsReceived,
         CancellationToken cancellationToken = default)
     {
         var streamingService = new StreamingService(_httpClient);
@@ -48,7 +52,10 @@ public class ConnectionManager : IDisposable
                 apiKey,
                 userMessage,
                 systemMessage,
+                tools,
+                conversationHistory,
                 onChunkReceived,
+                onToolCallsReceived,
                 cancellationToken);
 
             StopPingTimer();
@@ -71,7 +78,10 @@ public class ConnectionManager : IDisposable
         string apiKey,
         string userMessage,
         string? systemMessage,
+        List<Tool>? tools,
+        List<Message>? conversationHistory,
         Action<string> onChunkReceived,
+        Action<List<ToolCall>> onToolCallsReceived,
         CancellationToken cancellationToken = default)
     {
         int attempt = 0;
@@ -97,7 +107,10 @@ public class ConnectionManager : IDisposable
                     apiKey,
                     userMessage,
                     systemMessage,
+                    tools,
+                    conversationHistory,
                     onChunkReceived,
+                    onToolCallsReceived,
                     cancellationToken);
 
                 if (result)

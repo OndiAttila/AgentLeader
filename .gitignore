@@ -2,3 +2,4 @@ AgentLead/bin/*
 AgentLead/obj/*
 AgentLead.Tests/bin/*
 AgentLead.Tests/obj/*
+run_local.sh

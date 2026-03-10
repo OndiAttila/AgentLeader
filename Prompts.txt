@@ -31,3 +31,12 @@ By default no System message is specified.
 The user can specify the path to the file containing the system message with the config command /s.
 If a System message has been specified (via the /s config command), that same System message should be used in all further communication until a new System message has been specified
 ---------
+
+===[ ]===
+Update the code to maintain a list of capabilities that the Agent can use via tool calls.
+Define two such capabilities:
+- echo: When called, it will print its parameter to the User's console
+- ls: When called, it will return the list of file names in the User's current directory
+When sending messages to the Agent, include the available tool capabilities in the Agent message.
+When the Agent responds with a tool call request, invoke the appropriate tool capability and respond to the Agent with the result of the call as a continuation of the previous message flow.
+---------

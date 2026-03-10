@@ -25,7 +25,10 @@ public class StreamingService : IDisposable
         string apiKey,
         string userMessage,
         string? systemMessage,
+        List<Tool>? tools,
+        List<Message>? conversationHistory,
         Action<string> onChunkReceived,
+        Action<List<ToolCall>> onToolCallsReceived,
         CancellationToken cancellationToken = default)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -37,13 +40,19 @@ public class StreamingService : IDisposable
             messages.Add(new Message { Role = "system", Content = systemMessage });
         }
 
+        if (conversationHistory != null)
+        {
+            messages.AddRange(conversationHistory);
+        }
+
         messages.Add(new Message { Role = "user", Content = userMessage });
 
         var request = new ChatRequest
         {
             Model = model,
             Messages = messages,
-            Stream = true
+            Stream = true,
+            Tools = tools
         };
 
         var json = JsonSerializer.Serialize(request);
@@ -83,6 +92,9 @@ Console.WriteLine($"[StreamingService.SendStreamingRequestAsync] apiKey: |{apiKe
 
             try
             {
+                var accumulatedToolCalls = new Dictionary<string, ToolCall>();
+                var hasReceivedToolCalls = false;
+
                 while (true)
                 {
                     if (_cts.Token.IsCancellationRequested) {
@@ -113,7 +125,9 @@ Console.WriteLine($"\n[StreamingService.SendStreamingRequestAsync]] response lin
                         try
                         {
                             var response = JsonSerializer.Deserialize<ChatResponse>(data);
-                            var contentDelta = response?.Choices?.FirstOrDefault()?.Delta?.Content;
+                            var delta = response?.Choices?.FirstOrDefault()?.Delta;
+                            var contentDelta = delta?.Content;
+                            
                             if (!string.IsNullOrEmpty(contentDelta))
                             {
 #region debug
@@ -122,11 +136,34 @@ Console.WriteLine($"\n[StreamingService.SendStreamingRequestAsync]] full respons
 #endregion
                                 onChunkReceived(contentDelta);
                             }
+
+                            if (delta?.ToolCalls != null && delta.ToolCalls.Count > 0)
+                            {
+                                hasReceivedToolCalls = true;
+                                foreach (var toolCall in delta.ToolCalls)
+                                {
+                                    if (!accumulatedToolCalls.ContainsKey(toolCall.Id))
+                                    {
+                                        accumulatedToolCalls[toolCall.Id] = toolCall;
+                                    }
+                                    else
+                                    {
+                                        var existing = accumulatedToolCalls[toolCall.Id];
+                                        existing.Function.Name += toolCall.Function.Name;
+                                        existing.Function.Arguments += toolCall.Function.Arguments;
+                                    }
+                                }
+                            }
                         }
                         catch (JsonException)
                         {
                         }
                     }
+                }
+
+                if (hasReceivedToolCalls && accumulatedToolCalls.Count > 0)
+                {
+                    onToolCallsReceived(accumulatedToolCalls.Values.ToList());
                 }
             }
             catch (ObjectDisposedException)

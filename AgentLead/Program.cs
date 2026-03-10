@@ -1,5 +1,6 @@
 using System.Security;
 using AgentLead;
+using AgentLead.Models;
 using AgentLead.Options;
 using AgentLead.Services;
 
@@ -19,6 +20,7 @@ if (!config.PromptForApiKey())
 config.DisplayCurrentSettings();
 
 var client = new OpenAIClient();
+var conversationHistory = new List<Message>();
 var shouldExit = false;
 
 while (!shouldExit)
@@ -109,7 +111,10 @@ while (!shouldExit)
     }
 
     Console.WriteLine();
-    var fullResponse = new System.Text.StringBuilder();
+    conversationHistory.Add(new Message { Role = "user", Content = input });
+
+    var tools = client.ToolService.GetToolDefinitions();
+    var toolCallsReceived = new List<ToolCall>();
     var isFirstChunk = true;
 
     try
@@ -120,22 +125,86 @@ while (!shouldExit)
             config.ApiKey,
             input,
             config.SystemMessage,
+            tools,
+            conversationHistory,
             chunk =>
             {
                 if (isFirstChunk)
                 {
                     isFirstChunk = false;
                 }
-                fullResponse.Append(chunk);
                 Console.Write(chunk);
+            },
+            toolCalls =>
+            {
+                toolCallsReceived.AddRange(toolCalls);
             });
 
         if (!success)
         {
             Console.WriteLine("\n\nFailed to get response. You can try again or use /quit to exit.");
+            conversationHistory.Clear();
         }
         else
         {
+            Console.WriteLine();
+        }
+
+        while (toolCallsReceived.Count > 0)
+        {
+            Console.WriteLine();
+
+            var toolMessages = new List<Message>();
+            foreach (var toolCall in toolCallsReceived)
+            {
+                Console.WriteLine($"[Calling tool: {toolCall.Function.Name}]");
+                var result = await client.ToolService.ExecuteToolAsync(
+                    toolCall.Function.Name, 
+                    toolCall.Function.Arguments);
+                
+                Console.WriteLine($"[Tool result: {result}]");
+                
+                toolMessages.Add(new Message
+                {
+                    Role = "tool",
+                    Content = result,
+                    ToolCallId = toolCall.Id
+                });
+            }
+
+            conversationHistory.Add(new Message { Role = "user", Content = input });
+            conversationHistory.AddRange(toolMessages);
+
+            toolCallsReceived.Clear();
+            isFirstChunk = true;
+
+            var success2 = await client.SendChatMessageAsync(
+                config.BaseUrl,
+                config.ModelName,
+                config.ApiKey,
+                input,
+                config.SystemMessage,
+                tools,
+                conversationHistory,
+                chunk =>
+                {
+                    if (isFirstChunk)
+                    {
+                        isFirstChunk = false;
+                    }
+                    Console.Write(chunk);
+                },
+                newToolCalls =>
+                {
+                    toolCallsReceived.AddRange(newToolCalls);
+                });
+
+            if (!success2)
+            {
+                Console.WriteLine("\n\nFailed to get response from tool call.");
+                break;
+            }
+
             Console.WriteLine();
         }
     }
@@ -148,6 +217,8 @@ while (!shouldExit)
         Console.WriteLine($"\n\nError: {ex.Message}");
         Console.WriteLine("You can try again or use /quit to exit.");
     }
+
+    conversationHistory.Clear();
 }
 
 Console.WriteLine("Goodbye!");

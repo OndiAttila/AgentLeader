@@ -1,3 +1,5 @@
+using AgentLead.Models;
+
 namespace AgentLead.Options;
 
 public class AppConfiguration
@@ -7,6 +9,7 @@ public class AppConfiguration
     public string ApiKey { get; set; } = "dummy";
     public string? SystemMessage { get; set; } = null;
     public bool Help { get; set; } = false;
+    public List<McpServerConfig> McpServers { get; set; } = new();
 
     public static AppConfiguration Parse(string[] args)
     {
@@ -69,9 +72,54 @@ public class AppConfiguration
                 options.ModelName = arg.Substring("-m=".Length);
                 continue;
             }
+
+            if ((arg == "--mcp-servers" || arg == "-mcp") && i + 1 < args.Length)
+            {
+                var mcpConfigPath = args[++i];
+                if (!options.LoadMcpServersFromFile(mcpConfigPath))
+                {
+                    Console.WriteLine($"Error: Failed to load MCP servers from: {mcpConfigPath}");
+                }
+                continue;
+            }
+
+            if (arg.StartsWith("--mcp-servers=") || arg.StartsWith("-mcp="))
+            {
+                var mcpConfigPath = arg.Contains("=") ? arg.Substring(arg.IndexOf('=') + 1) : "";
+                if (!string.IsNullOrEmpty(mcpConfigPath) && !options.LoadMcpServersFromFile(mcpConfigPath))
+                {
+                    Console.WriteLine($"Error: Failed to load MCP servers from: {mcpConfigPath}");
+                }
+                continue;
+            }
         }
 
         return options;
+    }
+
+    public bool LoadMcpServersFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine($"Error: MCP config file not found: {filePath}");
+            return false;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var servers = System.Text.Json.JsonSerializer.Deserialize<List<McpServerConfig>>(json);
+            if (servers != null)
+            {
+                McpServers = servers;
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading MCP config: {ex.Message}");
+        }
+        return false;
     }
 
     public void SetApiKey(string apiKey) 
@@ -122,6 +170,12 @@ public class AppConfiguration
         Console.WriteLine($"  Model: {ModelName}");
         Console.WriteLine($"  API Key: {(!string.IsNullOrWhiteSpace(ApiKey) ? "Set" : "Not Set")}");
         Console.WriteLine($"  System Message: {(string.IsNullOrWhiteSpace(SystemMessage) ? "Not Set" : "Set")}");
+        Console.WriteLine($"  MCP Servers: {(McpServers.Count > 0 ? $"{McpServers.Count} configured" : "None")}");
+        foreach (var server in McpServers)
+        {
+            var serverDetail = server.ConnectionType == "stdio" ? server.Command : server.Url;
+            Console.WriteLine($"    - {server.Name} ({server.ConnectionType}: {serverDetail})");
+        }
         Console.WriteLine();
     }
 
@@ -133,7 +187,8 @@ public class AppConfiguration
         Console.WriteLine();
         Console.WriteLine("Options:");
         Console.WriteLine("  --base-url, -u <url>    OpenAI API base URL (default: https://api.openai.com/v1)");
-        Console.WriteLine("  --model, -m <name>     LLM model name (default: gpt-4)");
+        Console.WriteLine("  --model, -m <name>      LLM model name (default: gpt-4)");
+        Console.WriteLine("  --mcp-servers, -mcp <file>  Path to MCP servers JSON config file");
         Console.WriteLine("  --help, -h             Show this help message");
         Console.WriteLine();
         Console.WriteLine("Interactive Commands:");

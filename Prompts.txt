@@ -63,3 +63,18 @@ Update the project in MCPServer folder to allow selecting the listening port whe
 In the Program.cs file (in the MCPServer directory) the method call handling logic in the "RunStdioServer" and the "RunHttpServer" methods seem to share a lot of commonalities.
 Try to refactor the logic in both methods to reduce code duplication, ideally by intoducing only one new method (that both aforementioned methods will call)
 ---------
+
+===[ ]===
+Add capability to AgentLead project (in AgentLead directory) to connect to a list of MCP servers (each over stdio or HTTP, as its configuration indicates).
+If an MCP server properly identifies its tools capabilites, add each of those capabilites dynamically to the internal tools repository along with its MCP server origins, so the tool call from the LLM can be routed to the appropriate MCP tool Server
+---------
+
+===[ ]===
+Currently the the project in AgentLead directory represents built-in MCP tool functions by naming them without an undersore and external MCP tool functions by naming them using an underscore in the format:  <mcp>_<tool>, where <mcp> is the name of the external MCP server and <tool> is the name of the tool function the MCP server provides.
+Update the project to represent an MCP tool with a separate name (mcpName) for the MCP server (or null for built-in capability) and a separate name (toolName) for the tool function the Mcp server provides
+---------
+
+===[ ]===
+Currently the project in AgentLead directory provide only one tool function with the same name even if multiple MCP servers offer a tool function with the same name (but maybe different description or parameters)
+Update the project to allow multiple tools of the same name from different MCP servers by maintaining a counter (starting at 0) that is incremented every time there is a conflict in the name of the current tool to be registered and and one that is already registered (from a previous MCP server), then append the current value of the counter to the current tool name to be registered when listing it for the LLM (the tool name will be the original one when calling it on the MCP server)
+---------

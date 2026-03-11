@@ -19,7 +19,23 @@ if (!config.PromptForApiKey())
 
 config.DisplayCurrentSettings();
 
+var mcpClientService = new McpClientService();
+if (config.McpServers.Count > 0)
+{
+    Console.WriteLine($"Connecting to {config.McpServers.Count} MCP server(s)...");
+    try
+    {
+        await mcpClientService.InitializeAsync(config.McpServers);
+        Console.WriteLine($"Connected to {mcpClientService.ToolDefinitions.Count} MCP tools");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Failed to initialize MCP servers: {ex.Message}");
+    }
+}
+
 var client = new OpenAIClient();
+client.ToolService.SetMcpClientService(mcpClientService);
 var conversationHistory = new List<Message>();
 var shouldExit = false;
 
@@ -221,4 +237,5 @@ while (!shouldExit)
     conversationHistory.Clear();
 }
 
+mcpClientService.Dispose();
 Console.WriteLine("Goodbye!");

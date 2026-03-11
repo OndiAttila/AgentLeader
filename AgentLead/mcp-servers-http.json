@@ -1,0 +1,7 @@
+[
+  {
+    "name": "example-http",
+    "connectionType": "http",
+    "url": "http://localhost:5000/mcp"
+  }
+]

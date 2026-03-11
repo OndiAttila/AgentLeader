@@ -1,0 +1,8 @@
+[
+  {
+    "name": "local-mcp",
+    "connectionType": "stdio",
+    "command": "dotnet",
+    "args": "run --project ../MCPServer/MCPServer.csproj"
+  }
+]

@@ -97,3 +97,10 @@ public class FunctionCall
     [JsonPropertyName("arguments")]
     public string Arguments { get; set; } = string.Empty;
 }
+
+public class ToolDefinition
+{
+    public string? McpName { get; set; }
+    public string ToolName { get; set; } = string.Empty;
+    public Tool Tool { get; set; } = new();
+}

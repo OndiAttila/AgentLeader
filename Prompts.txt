@@ -49,3 +49,17 @@ Define two tool functions for the MCPServer:
 ---------
 - Project created with tool call support for stdio
 
+===[ ]===
+Update the project in MCPServer folder to allow running the program as a server when invoked with the command line parameter "--server".
+When running in default mode, the program should support toll function calls over stdio (as it does now)
+When running in server mode, the program should support tool function calls over HTTP.
+---------
+
+===[ ]===
+Update the project in MCPServer folder to allow selecting the listening port when specifying the command line parameter --port in HTTP server mode
+---------
+
+===[ ]===
+In the Program.cs file (in the MCPServer directory) the method call handling logic in the "RunStdioServer" and the "RunHttpServer" methods seem to share a lot of commonalities.
+Try to refactor the logic in both methods to reduce code duplication, ideally by intoducing only one new method (that both aforementioned methods will call)
+---------

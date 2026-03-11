@@ -252,9 +252,15 @@ public class McpClientService : IDisposable
         {
             return;
         }
+#region debug
+Console.WriteLine($"[debug] Got {servers.Count} MCP configurations");
+#endregion
 
         foreach (var serverConfig in servers)
         {
+#region debug
+Console.WriteLine($"[debug] MCP config: name: '{serverConfig.Name}', connectionType: '{serverConfig.ConnectionType}', command: '{serverConfig.Command}', args: '{serverConfig.Args}', url: '{serverConfig.Url}'");
+#endregion
             try
             {
                 var client = new McpClient(serverConfig);

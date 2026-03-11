@@ -46,11 +46,13 @@ static void RunStdioServer()
         if (string.IsNullOrEmpty(line)) break;
 
         using var doc = JsonDocument.Parse(line);
+        var id = doc.RootElement.TryGetProperty("id", out var idProp) ? (JsonElement?)idProp : null;
         var result = HandleMcpRequest(doc.RootElement);
 
         if (result != null)
         {
-            var json = JsonSerializer.Serialize(result, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var response = new { jsonrpc = "2.0", id, result };
+            var json = JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             Console.WriteLine(json);
         }
     }

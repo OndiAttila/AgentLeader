@@ -70,12 +70,12 @@ public class AppConfigurationTests
     }
 
     [Fact]
-    public void Parse_UnknownArgs_Ignored()
+    public void Parse_UnknownArgs_ThrowsException()
     {
-        var config = AppConfiguration.Parse(new[] { "--unknown", "value" });
+        var ex = Assert.Throws<InvalidOperationException>(() => 
+            AppConfiguration.Parse(new[] { "--unknown", "value" }));
 
-        Assert.Equal("https://api.openai.com/v1", config.BaseUrl);
-        Assert.Equal("gpt-4", config.ModelName);
+        Assert.Contains("Unknown option", ex.Message);
     }
 
     [Fact]

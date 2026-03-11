@@ -83,3 +83,29 @@ Update the project to allow multiple tools of the same name from different MCP s
 Update the project in MCPServer folder to allow selecting the bind interface when specifying the command line parameter --host in HTTP server mode.
 The default value for the --host parameter should be 0.0.0.0 (all interfaces)
 ---------
+
+===[ ]===
+After modifying the file AppConfiguration.cs in the AgentLead directory to throw exceptions on invalid or unknown configuration options, the tests in AgentLead.Tests no longer pass.
+Fix the tests to account for the modified behavior
+---------
+
+===[ ]===
+The AgentLead project (in the AgentLead directory) allows specification of MCP servers via a configuration file with the use of the "--mcp-servers" command line parameter.
+When the mcp-servers.json file is passed as the MCP server configuration, the AgentLead program reports that it failed to connect to the server via stdio as the specified MCP server requires a command.
+The code for the MCP server specified in the mcp-server.json file is located in the MCPServer directory.
+Analyze the two projects (AgentLead and MCPServer) to determine which of these is the the core of the problem:
+- an error in the configuration (as specified in the mcp-servers.json file), or
+- a mismatched expectation between AgentLead and MCPServer of how an MCP server is supposed to operate via stdio.
+If the error is in the mcp-servers.json configuration file, fix it.
+If the MCPServer project (as-is) can be invoked in a way to provide the expected stdio communication capabilities, update the mcp-servers.json file with the required arguments.
+If the MCPServer project (as-is) cannot be be invoked in a way to provide the expected stdio communication capabilities for an AMCP server, outline the changes needed in the MCPServer project.
+Otherwise, outline the chnanges needed in the AgentLead project to properly communicate with an MCP server via the stdio protocol.
+---------
+
+===[ ]===
+When the AgentLead project (in AgentLead directory) reads an MCP configuration file (when invoked with the --mcp-servers command line arguments), incorrect configuration files do not produce an immediate error, leading the user to wonder what leads to connection errors.
+One such incorrect configuration file is mcp-servers.wrong.json.
+The problem is that the names of the fields in the file are camel-case, when the JSON deserialization in the LoadMcpServersFromFile method (in AppConfiguration.cs)) expects Pascal-casing.
+The result is that the fileds of the items in the 'servers' list contain their default value (e.g., empty string) and the unexpected fields from the configuration json are silently ignored.
+Update the JSON deserialization logic to read the JSON input with case-insensitivy for the fields.
+---------

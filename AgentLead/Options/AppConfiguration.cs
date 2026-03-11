@@ -76,9 +76,14 @@ public class AppConfiguration
             if ((arg == "--mcp-servers" || arg == "-mcp") && i + 1 < args.Length)
             {
                 var mcpConfigPath = args[++i];
+#region debug
+Console.WriteLine($"[debug] reading MCP configuration from: {mcpConfigPath}");
+#endregion
                 if (!options.LoadMcpServersFromFile(mcpConfigPath))
                 {
-                    Console.WriteLine($"Error: Failed to load MCP servers from: {mcpConfigPath}");
+                    var msg = $"Error: Failed to load MCP servers from: {mcpConfigPath}";
+                    Console.WriteLine(msg);
+                    throw new InvalidOperationException(msg);
                 }
                 continue;
             }
@@ -88,9 +93,17 @@ public class AppConfiguration
                 var mcpConfigPath = arg.Contains("=") ? arg.Substring(arg.IndexOf('=') + 1) : "";
                 if (!string.IsNullOrEmpty(mcpConfigPath) && !options.LoadMcpServersFromFile(mcpConfigPath))
                 {
-                    Console.WriteLine($"Error: Failed to load MCP servers from: {mcpConfigPath}");
+                    var msg = $"Error: Failed to load MCP servers from: {mcpConfigPath}";
+                    Console.WriteLine(msg);
+                    throw new InvalidOperationException(msg);
                 }
                 continue;
+            }
+
+            {
+                var msg = $"Error: Unknown option: {arg}";
+                Console.WriteLine(msg);
+                throw new InvalidOperationException(msg);
             }
         }
 
@@ -108,7 +121,14 @@ public class AppConfiguration
         try
         {
             var json = File.ReadAllText(filePath);
-            var servers = System.Text.Json.JsonSerializer.Deserialize<List<McpServerConfig>>(json);
+#region debug
+Console.WriteLine($"[debug] read MCP configuration json: {json}");
+#endregion
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var servers = System.Text.Json.JsonSerializer.Deserialize<List<McpServerConfig>>(json, options);
             if (servers != null)
             {
                 McpServers = servers;

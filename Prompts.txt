@@ -78,3 +78,8 @@ Update the project to represent an MCP tool with a separate name (mcpName) for t
 Currently the project in AgentLead directory provide only one tool function with the same name even if multiple MCP servers offer a tool function with the same name (but maybe different description or parameters)
 Update the project to allow multiple tools of the same name from different MCP servers by maintaining a counter (starting at 0) that is incremented every time there is a conflict in the name of the current tool to be registered and and one that is already registered (from a previous MCP server), then append the current value of the counter to the current tool name to be registered when listing it for the LLM (the tool name will be the original one when calling it on the MCP server)
 ---------
+
+===[ ]===
+Update the project in MCPServer folder to allow selecting the bind interface when specifying the command line parameter --host in HTTP server mode.
+The default value for the --host parameter should be 0.0.0.0 (all interfaces)
+---------

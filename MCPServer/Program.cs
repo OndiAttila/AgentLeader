@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 var commandArgs = args.Length > 0 ? args : Environment.GetCommandLineArgs().Skip(1).ToArray();
 
 int port = 5000;
+string host = "localhost";
 bool runServer = false;
 for (int i = 0; i < commandArgs.Length; i++)
 {
@@ -21,11 +22,16 @@ for (int i = 0; i < commandArgs.Length; i++)
             i++;
         }
     }
+    if (commandArgs[i] == "--host" && i + 1 < commandArgs.Length)
+    {
+        host = commandArgs[i + 1];
+        i++;
+    }
 }
 
 if (runServer)
 {
-    RunHttpServer(port);
+    RunHttpServer(host, port);
 }
 else
 {
@@ -50,7 +56,7 @@ static void RunStdioServer()
     }
 }
 
-static void RunHttpServer(int port)
+static void RunHttpServer(string host, int port)
 {
     var builder = WebApplication.CreateBuilder();
     var app = builder.Build();
@@ -71,8 +77,8 @@ static void RunHttpServer(int port)
 
     app.MapGet("/", () => "MCPServer is running. POST to /mcp for MCP protocol.");
 
-    Console.WriteLine($"Starting MCPServer HTTP on http://localhost:{port}/mcp");
-    app.Run($"http://localhost:{port}");
+    Console.WriteLine($"Starting MCPServer HTTP on http://{host}:{port}/mcp");
+    app.Run($"http://{host}:{port}");
 }
 
 static object? HandleMcpRequest(JsonElement root)
